@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Grades | EduPortal{% endblock %}
+{% block page_title %}Student Grades Manager{% endblock %}
+
+{% block content %}
+<div class="table-card" style="max-width: 1100px; margin: 0 auto;">
+    <div class="table-card-header flex-column flex-md-row align-items-start align-items-md-center gap-3">
+        <div>
+            <h5 class="fw-bold text-dark mb-1">{{ course.course_name }} ({{ course.course_code }})</h5>
+            <p class="text-muted small mb-0">Enter assignment, mid-term, and final exam marks for all enrolled students</p>
+        </div>
+        <a href="{% url 'academics_hub' %}" class="btn btn-outline-secondary btn-sm rounded-pill ms-md-auto">
+            <i data-lucide="arrow-left" class="me-1" style="width:14px;height:14px;vertical-align:text-bottom;"></i>
+            Back to Hub
+        </a>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table custom-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Roll No.</th>
+                        <th>Student Name</th>
+                        <th style="min-width:110px;">Assignment</th>
+                        <th style="min-width:110px;">Mid Exam</th>
+                        <th style="min-width:110px;">Final Exam</th>
+                        <th style="min-width:180px;">Comments</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in student_marks_list %}
+                        <tr>
+                            <td><span class="fw-bold">{{ item.student.roll_number }}</span></td>
+                            <td>{{ item.student.first_name }} {{ item.student.last_name }}</td>
+                            <td>
+                                <input type="number" name="assignment_{{ item.student.id }}"
+                                       class="form-control form-control-sm border-color"
+                                       step="0.01" min="0" max="100" placeholder="0"
+                                       value="{% if item.marks %}{{ item.marks.assignment_marks }}{% endif %}">
+                            </td>
+                            <td>
+                                <input type="number" name="mid_{{ item.student.id }}"
+                                       class="form-control form-control-sm border-color"
+                                       step="0.01" min="0" max="100" placeholder="0"
+                                       value="{% if item.marks %}{{ item.marks.mid_marks }}{% endif %}">
+                            </td>
+                            <td>
+                                <input type="number" name="final_{{ item.student.id }}"
+                                       class="form-control form-control-sm border-color"
+                                       step="0.01" min="0" max="100" placeholder="0"
+                                       value="{% if item.marks %}{{ item.marks.final_marks }}{% endif %}">
+                            </td>
+                            <td>
+                                <input type="text" name="comments_{{ item.student.id }}"
+                                       class="form-control form-control-sm border-color"
+                                       placeholder="Optional note"
+                                       value="{% if item.marks and item.marks.teacher_comments %}{{ item.marks.teacher_comments }}{% endif %}">
+                            </td>
+                            <td>
+                                {% if item.marks %}
+                                    <span class="fw-bold text-primary">{{ item.marks.total_marks }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">No students are enrolled in this course yet.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if student_marks_list %}
+            <div class="card-footer bg-transparent border-top py-3 d-flex gap-2 justify-content-between flex-wrap">
+                <a href="{% url 'mark_attendance' course.id %}" class="btn btn-outline-warning rounded-pill text-dark">
+                    <i data-lucide="calendar-check" class="me-1" style="width:14px;height:14px;vertical-align:text-bottom;"></i>
+                    Mark Attendance
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-secondary rounded-pill">View Course</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">
+                        <i data-lucide="save" class="me-1" style="width:14px;height:14px;vertical-align:text-bottom;"></i>
+                        Save All Grades
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Approvals | EduPortal{% endblock %}
+{% block page_title %}Pending Student Approvals{% endblock %}
+
+{% block content %}
+
+<!-- Header Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-4"
+             style="background: linear-gradient(135deg, #f59e0b22, #f59e0b11); border-left: 4px solid #f59e0b !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center justify-content-center rounded-3 p-3"
+                     style="background: rgba(245,158,11,0.15); width:56px; height:56px;">
+                    <i data-lucide="clock" style="width:28px;height:28px;color:#f59e0b;"></i>
+                </div>
+                <div>
+                    <div class="fs-3 fw-bold">{{ paginator.count }}</div>
+                    <div class="text-muted small">Student registration(s) waiting for your review</div>
+                </div>
+                <div class="ms-auto">
+                    <a href="{% url 'admin_student_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i data-lucide="users" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                        View Approved Students
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if pending_students %}
+<!-- Pending Students Table -->
+<div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-3 px-4">
+        <h6 class="fw-bold mb-0">
+            <i data-lucide="user-check" class="me-2" style="width:18px;height:18px;vertical-align:middle;color:#f59e0b;"></i>
+            Pending Registrations
+        </h6>
+        <span class="badge rounded-pill" style="background:#f59e0b; color:#000;">
+            {{ paginator.count }} pending
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4 py-3">#</th>
+                    <th class="py-3">Student</th>
+                    <th class="py-3">Roll Number</th>
+                    <th class="py-3">Department</th>
+                    <th class="py-3">Semester</th>
+                    <th class="py-3">Contact</th>
+                    <th class="py-3 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in pending_students %}
+                <tr>
+                    <td class="ps-4 text-muted small">{{ forloop.counter }}</td>
+
+                    <!-- Student Info -->
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if student.profile_image %}
+                                <img src="{{ student.profile_image.url }}" alt="{{ student.first_name }}"
+                                     class="rounded-circle object-fit-cover"
+                                     style="width:40px;height:40px;border:2px solid #f59e0b;">
+                            {% else %}
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                                     style="width:40px;height:40px;background:linear-gradient(135deg,#f59e0b,#d97706);font-size:1rem;border:2px solid rgba(245,158,11,0.3);">
+                                    {{ student.first_name|first|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="fw-semibold">{{ student.first_name }} {{ student.last_name }}</div>
+                                <div class="text-muted small">@{{ student.user.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="badge bg-secondary rounded-pill">{{ student.roll_number }}</span>
+                    </td>
+
+                    <td class="text-muted small">{{ student.department }}</td>
+                    <td class="text-muted small">Sem {{ student.semester }}</td>
+
+                    <td>
+                        <div class="small text-muted">{{ student.email }}</div>
+                        <div class="small text-muted">{{ student.phone }}</div>
+                    </td>
+
+                    <!-- Approve / Reject Actions -->
+                    <td class="text-center">
+                        <div class="d-flex gap-2 justify-content-center">
+                            <!-- Approve Button -->
+                            <form method="post" action="{% url 'admin_approve_student' student.pk %}"
+                                  onsubmit="return confirm('Approve {{ student.first_name }} {{ student.last_name }}? They will be able to log in immediately.');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-success btn-sm rounded-pill px-3"
+                                        title="Approve Registration">
+                                    <i data-lucide="check" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                                    Approve
+                                </button>
+                            </form>
+
+                            <!-- Reject Button -->
+                            <form method="post" action="{% url 'admin_reject_student' student.pk %}"
+                                  onsubmit="return confirm('Reject and permanently delete {{ student.first_name }} {{ student.last_name }}\'s registration? This cannot be undone.');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-outline-danger btn-sm rounded-pill px-3"
+                                        title="Reject Registration">
+                                    <i data-lucide="x" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="card-footer bg-transparent border-top py-3 px-4">
+        <nav aria-label="Pending students pagination">
+            <ul class="pagination pagination-sm mb-0 justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link rounded-pill" href="?page={{ page_obj.previous_page_number }}">
+                            <i data-lucide="chevron-left" style="width:14px;height:14px;vertical-align:middle;"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link rounded-pill">{{ num }}</span>
+                        </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link rounded-pill" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}">
+                            <i data-lucide="chevron-right" style="width:14px;height:14px;vertical-align:middle;"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="card border-0 shadow-sm rounded-3 p-5 text-center">
+    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mx-auto mb-3"
+         style="width:72px;height:72px;background:rgba(16,185,129,0.1);">
+        <i data-lucide="check-circle-2" style="width:36px;height:36px;color:#10b981;"></i>
+    </div>
+    <h5 class="fw-bold mb-2">All Clear!</h5>
+    <p class="text-muted mb-4">There are no pending student registrations right now.</p>
+    <div class="d-flex justify-content-center gap-2">
+        <a href="{% url 'admin_student_list' %}" class="btn btn-primary rounded-pill px-4">
+            <i data-lucide="users" class="me-2" style="width:16px;height:16px;vertical-align:middle;"></i>
+            View All Students
+        </a>
+        <a href="{% url 'admin_student_add' %}" class="btn btn-outline-primary rounded-pill px-4">
+            <i data-lucide="user-plus" class="me-2" style="width:16px;height:16px;vertical-align:middle;"></i>
+            Add Student Manually
+        </a>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

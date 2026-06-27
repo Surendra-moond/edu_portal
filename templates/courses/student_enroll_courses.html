@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Enroll in Courses | EduPortal{% endblock %}
+{% block page_title %}Enroll in Courses{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-4"
+             style="background: linear-gradient(135deg, #3b82f622, #3b82f611); border-left: 4px solid #3b82f6 !important;">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <div class="d-flex align-items-center justify-content-center rounded-3 p-3"
+                     style="background: rgba(59,130,246,0.15); width:56px; height:56px;">
+                    <i data-lucide="book-plus" style="width:28px;height:28px;color:#3b82f6;"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="fw-bold mb-1">Request Course Enrollment</h5>
+                    <div class="text-muted small">Select a course and send a request. After admin approval, the course will appear in your enrolled courses.</div>
+                </div>
+                <a href="{% url 'course_list' %}" class="btn btn-outline-primary btn-sm rounded-pill">
+                    <i data-lucide="book-open" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                    My Enrolled Courses
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-card-header">
+        <h5 class="m-0 fw-bold text-dark">Available Courses</h5>
+    </div>
+
+    <div class="p-4 border-bottom bg-light bg-opacity-10">
+        <form method="get" class="row g-3">
+            <div class="col-12 col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-color"><i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i></span>
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control border-start-0 border-color" placeholder="Search by course code or title...">
+                </div>
+            </div>
+            <div class="col-12 col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary rounded-pill">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Course Title</th>
+                    <th>Credits</th>
+                    <th>Teacher</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in course_items %}
+                    <tr>
+                        <td><span class="fw-bold text-primary">{{ item.course.course_code }}</span></td>
+                        <td><span class="fw-semibold">{{ item.course.course_name }}</span></td>
+                        <td><span class="badge bg-secondary rounded-pill text-dark px-3 py-2">{{ item.course.credits }} Credits</span></td>
+                        <td>
+                            {% if item.course.teacher %}
+                                <span class="small">{{ item.course.teacher.user.get_full_name|default:item.course.teacher.user.username }}</span>
+                            {% else %}
+                                <span class="text-muted small">Not Assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.request_status == 'PENDING' %}
+                                <span class="badge rounded-pill" style="background:#f59e0b;color:#000;">Pending Approval</span>
+                            {% elif item.request_status == 'REJECTED' %}
+                                <span class="badge bg-danger rounded-pill">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark border rounded-pill">Available</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            {% if item.request_status == 'PENDING' %}
+                                <button class="btn btn-outline-secondary btn-sm rounded-pill" disabled>
+                                    <i data-lucide="clock" style="width:14px;height:14px;vertical-align:text-bottom;"></i> Awaiting
+                                </button>
+                            {% elif item.request_status == 'REJECTED' %}
+                                <form method="post" action="{% url 'request_course_enrollment' item.course.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill">
+                                        <i data-lucide="refresh-cw" class="me-1" style="width:14px;height:14px;vertical-align:text-bottom;"></i> Re-request
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="post" action="{% url 'request_course_enrollment' item.course.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-pill">
+                                        <i data-lucide="send" class="me-1" style="width:14px;height:14px;vertical-align:text-bottom;"></i> Request Enrollment
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No available courses to enroll in. You may already be enrolled in all courses.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+        <div class="card-footer bg-transparent border-top py-3 d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm m-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|default:'' }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?q={{ request.GET.q|default:'' }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?q={{ request.GET.q|default:'' }}&page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

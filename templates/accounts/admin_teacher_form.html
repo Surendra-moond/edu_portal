@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Edit Teacher{% else %}Add Teacher{% endif %} | EduPortal{% endblock %}
+{% block page_title %}{% if object %}Edit Teacher Profile{% else %}Add New Teacher{% endif %}{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary" style="max-width: 800px; margin: 0 auto;">
+    <h5 class="fw-bold text-primary mb-4 pb-2 border-bottom">
+        <i data-lucide="user-plus" class="me-2" style="vertical-align: text-bottom;"></i>Teacher Information
+    </h5>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if not object %}
+            <!-- Create View: TeacherRegistrationForm contains User credentials -->
+            <h6 class="fw-bold text-secondary mb-3">1. Account Credentials</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="id_username" class="form-label small fw-semibold text-secondary">Username</label>
+                    <input type="text" name="username" class="form-control" required id="id_username">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_email" class="form-label small fw-semibold text-secondary">Email</label>
+                    <input type="email" name="email" class="form-control" required id="id_email">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_first_name" class="form-label small fw-semibold text-secondary">First Name</label>
+                    <input type="text" name="first_name" class="form-control" required id="id_first_name">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_last_name" class="form-label small fw-semibold text-secondary">Last Name</label>
+                    <input type="text" name="last_name" class="form-control" required id="id_last_name">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_password" class="form-label small fw-semibold text-secondary">Password</label>
+                    <input type="password" name="password" class="form-control" required id="id_password">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_confirm_password" class="form-label small fw-semibold text-secondary">Confirm Password</label>
+                    <input type="password" name="confirm_password" class="form-control" required id="id_confirm_password">
+                </div>
+            </div>
+            
+            <h6 class="fw-bold text-secondary mb-3 border-top pt-3">2. Professional Details</h6>
+        {% else %}
+            <!-- Update View: Allows editing first name, last name, and email dynamically since we fetch from POST in view -->
+            <h6 class="fw-bold text-secondary mb-3">1. Account Information</h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label for="id_first_name" class="form-label small fw-semibold text-secondary">First Name</label>
+                    <input type="text" name="first_name" value="{{ object.user.first_name }}" class="form-control" required id="id_first_name">
+                </div>
+                <div class="col-md-4">
+                    <label for="id_last_name" class="form-label small fw-semibold text-secondary">Last Name</label>
+                    <input type="text" name="last_name" value="{{ object.user.last_name }}" class="form-control" required id="id_last_name">
+                </div>
+                <div class="col-md-4">
+                    <label for="id_email" class="form-label small fw-semibold text-secondary">Email Address</label>
+                    <input type="email" name="email" value="{{ object.user.email }}" class="form-control" required id="id_email">
+                </div>
+            </div>
+            
+            <h6 class="fw-bold text-secondary mb-3 border-top pt-3">2. Professional Details</h6>
+        {% endif %}
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="id_employee_id" class="form-label small fw-semibold text-secondary">Employee ID</label>
+                {{ form.employee_id }}
+                {% if form.employee_id.errors %}<div class="text-danger small mt-1">{{ form.employee_id.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+                <label for="id_designation" class="form-label small fw-semibold text-secondary">Designation</label>
+                {{ form.designation }}
+                {% if form.designation.errors %}<div class="text-danger small mt-1">{{ form.designation.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+                <label for="id_department" class="form-label small fw-semibold text-secondary">Department</label>
+                {{ form.department }}
+                {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+                <label for="id_qualification" class="form-label small fw-semibold text-secondary">Qualification</label>
+                {{ form.qualification }}
+                {% if form.qualification.errors %}<div class="text-danger small mt-1">{{ form.qualification.errors.0 }}</div>{% endif %}
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+            <a href="{% url 'admin_teacher_list' %}" class="btn btn-outline-secondary rounded-pill">Cancel</a>
+            <button type="submit" class="btn btn-primary rounded-pill">{% if object %}Update Teacher{% else %}Create Teacher{% endif %}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

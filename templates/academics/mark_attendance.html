@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Mark Attendance | EduPortal{% endblock %}
+{% block page_title %}Mark Student Attendance{% endblock %}
+
+{% block content %}
+<div class="table-card" style="max-width: 900px; margin: 0 auto;">
+    <div class="table-card-header flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
+        <div>
+            <h5 class="fw-bold text-dark mb-1">{{ course.course_name }} ({{ course.course_code }})</h5>
+            <p class="text-muted small mb-0">Record daily attendance for enrolled students</p>
+        </div>
+        
+        <!-- Date Selector Form -->
+        <form method="get" id="date-select-form" class="d-flex align-items-center gap-2 ms-sm-auto">
+            <label for="attendance-date" class="small fw-semibold text-secondary text-nowrap">Class Date:</label>
+            <input type="date" name="date" id="attendance-date" value="{{ date }}" class="form-control form-control-sm py-1 border-color" onchange="this.form.submit();">
+        </form>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="date" value="{{ date }}">
+        
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th class="text-end">Attendance Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in student_attendance_list %}
+                        <tr>
+                            <td><span class="fw-bold">{{ item.student.roll_number }}</span></td>
+                            <td>{{ item.student.first_name }} {{ item.student.last_name }}</td>
+                            <td class="text-end">
+                                <div class="attendance-radio-group d-inline-flex">
+                                    <input type="radio" name="status_{{ item.student.id }}" id="pres_{{ item.student.id }}" value="P" {% if item.status == 'P' %}checked{% endif %}>
+                                    <label for="pres_{{ item.student.id }}">Present</label>
+                                    
+                                    <input type="radio" name="status_{{ item.student.id }}" id="abs_{{ item.student.id }}" value="A" {% if item.status == 'A' %}checked{% endif %}>
+                                    <label for="abs_{{ item.student.id }}">Absent</label>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">No students are currently enrolled in this course.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if student_attendance_list %}
+            <div class="card-footer bg-transparent border-top py-3 d-flex gap-2 justify-content-between flex-wrap">
+                <a href="{% url 'manage_marks' course.id %}" class="btn btn-outline-primary rounded-pill">
+                    <i data-lucide="award" class="me-1" style="width:14px;height:14px;vertical-align:text-bottom;"></i>
+                    Manage Grades
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'academics_hub' %}" class="btn btn-outline-secondary rounded-pill">Back to Hub</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Attendance</button>
+                </div>
+            </div>
+        {% else %}
+            <div class="card-footer bg-transparent border-top py-3">
+                <a href="{% url 'academics_hub' %}" class="btn btn-outline-secondary rounded-pill">Back to Hub</a>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

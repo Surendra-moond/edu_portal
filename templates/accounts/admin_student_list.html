@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Students | EduPortal{% endblock %}
+{% block page_title %}Student Management{% endblock %}
+
+{% block content %}
+<div class="table-card">
+    <div class="table-card-header">
+        <h5 class="m-0 fw-bold text-dark">Students Directory</h5>
+        <a href="{% url 'admin_student_add' %}" class="btn btn-primary btn-sm rounded-pill">
+            <i data-lucide="user-plus" class="me-1" style="width: 16px; height: 16px; vertical-align: text-bottom;"></i> Add Student
+        </a>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="p-4 border-bottom bg-light bg-opacity-10">
+        <form method="get" class="row g-3">
+            <div class="col-12 col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-color"><i data-lucide="search" style="width: 18px; color: var(--text-muted);"></i></span>
+                    <input type="text" name="q" value="{{ request.GET.q|default:'' }}" class="form-control border-start-0 border-color" placeholder="Search by name, roll, or email...">
+                </div>
+            </div>
+            
+            <div class="col-6 col-md-3">
+                <select name="dept" class="form-select border-color">
+                    <option value="">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept }}" {% if request.GET.dept == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-6 col-md-2">
+                <select name="sem" class="form-select border-color">
+                    <option value="">All Semesters</option>
+                    {% for sem in semesters %}
+                        <option value="{{ sem }}" {% if request.GET.sem == sem|stringformat:"i" %}selected{% endif %}>Semester {{ sem }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-12 col-md-2 d-grid">
+                <button type="submit" class="btn btn-outline-primary rounded-pill">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table custom-table">
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Semester</th>
+                    <th>Email / Phone</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                    <tr>
+                        <td><span class="fw-bold">{{ student.roll_number }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if student.profile_image %}
+                                    <img src="{{ student.profile_image.url }}" class="user-avatar" alt="Student">
+                                {% else %}
+                                    <div class="user-avatar bg-secondary text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; border-radius: 50%;">
+                                        {{ student.first_name|make_list|first|upper }}
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-semibold text-dark">{{ student.first_name }} {{ student.last_name }}</div>
+                                    <span class="text-muted small">ID: {{ student.id }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ student.department }}</td>
+                        <td>Semester {{ student.semester }}</td>
+                        <td>
+                            <div class="small">{{ student.email }}</div>
+                            <div class="text-muted small">{{ student.phone }}</div>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-2">
+                                <a href="{% url 'student_report_card_detail' student.id %}" class="btn btn-outline-success btn-sm rounded-pill" title="View Grades">
+                                    <i data-lucide="award" style="width: 14px; height: 14px;"></i> Grades
+                                </a>
+                                <a href="{% url 'student_attendance_detail' student.id %}" class="btn btn-outline-warning btn-sm rounded-pill text-dark" title="View Attendance">
+                                    <i data-lucide="calendar" style="width: 14px; height: 14px;"></i> Attendance
+                                </a>
+                                <a href="{% url 'admin_student_edit' student.id %}" class="btn btn-outline-primary btn-sm rounded-pill" title="Edit Profile">
+                                    <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
+                                </a>
+                                <a href="{% url 'admin_student_delete' student.id %}" class="btn btn-outline-danger btn-sm rounded-pill" title="Delete Student">
+                                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No student records found matching the criteria.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+        <div class="card-footer bg-transparent border-top py-3 d-flex justify-content-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm m-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                            <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

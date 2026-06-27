@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Course Details | EduPortal{% endblock %}
+{% block page_title %}Course Information{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Course Info Card -->
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary mb-4">
+            <h5 class="fw-bold text-primary mb-3">Course Properties</h5>
+            <div class="mb-3">
+                <span class="text-muted small d-block">Course Code</span>
+                <span class="fw-bold fs-5 text-dark">{{ course.course_code }}</span>
+            </div>
+            <div class="mb-3">
+                <span class="text-muted small d-block">Course Title</span>
+                <span class="fw-semibold text-dark">{{ course.course_name }}</span>
+            </div>
+            <div class="mb-3">
+                <span class="text-muted small d-block">Credits</span>
+                <span class="badge bg-secondary rounded-pill text-dark px-3 py-2 mt-1">{{ course.credits }} Credits</span>
+            </div>
+            <div class="mb-3 border-top pt-3">
+                <span class="text-muted small d-block">Assigned Instructor</span>
+                {% if course.teacher %}
+                    <span class="fw-semibold text-dark">{{ course.teacher.user.get_full_name|default:course.teacher.user.username }}</span>
+                    <span class="text-muted small d-block">Dept: {{ course.teacher.department }}</span>
+                {% else %}
+                    <span class="text-warning small fw-semibold">Not Assigned</span>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if can_manage_academics %}
+            <div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary mb-4">
+                <h5 class="fw-bold text-primary mb-3">Attendance & Grades</h5>
+                <p class="text-muted small mb-3">Record daily attendance and assign marks for enrolled students in this course.</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'mark_attendance' course.id %}" class="btn btn-warning rounded-pill text-dark fw-medium">
+                        <i data-lucide="calendar-check" class="me-2" style="width:16px;height:16px;vertical-align:text-bottom;"></i>
+                        Mark Attendance
+                    </a>
+                    <a href="{% url 'manage_marks' course.id %}" class="btn btn-primary rounded-pill">
+                        <i data-lucide="award" class="me-2" style="width:16px;height:16px;vertical-align:text-bottom;"></i>
+                        Assign / Update Grades
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if user.role == 'ADMIN' %}
+            <!-- Admin Enrollment Card -->
+            <div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary">
+                <h5 class="fw-bold text-primary mb-3">Enroll New Student</h5>
+                <form action="{% url 'course_enroll' course.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="student-select" class="form-label small fw-semibold text-secondary">Select Student</label>
+                        <select name="student" id="student-select" class="form-select" required>
+                            <option value="">-- Select Student --</option>
+                            {% for student in available_students %}
+                                <option value="{{ student.id }}">{{ student.first_name }} {{ student.last_name }} ({{ student.roll_number }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary rounded-pill">Assign Student</button>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Enrolled Students Directory -->
+    <div class="col-12 col-lg-8">
+        <div class="table-card">
+            <div class="table-card-header">
+                <h5 class="m-0 fw-bold text-dark">Enrolled Students ({{ enrollments.count }})</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>Roll Number</th>
+                            <th>Student Name</th>
+                            <th>Department</th>
+                            <th>Enrolled On</th>
+                            {% if user.role == 'ADMIN' %}
+                                <th class="text-end">Action</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                            <tr>
+                                <td><span class="fw-bold">{{ enrollment.student.roll_number }}</span></td>
+                                <td>{{ enrollment.student.first_name }} {{ enrollment.student.last_name }}</td>
+                                <td>{{ enrollment.student.department }}</td>
+                                <td><span class="small text-muted">{{ enrollment.enrolled_at|date:"M d, Y" }}</span></td>
+                                {% if user.role == 'ADMIN' %}
+                                    <td class="text-end">
+                                        <form action="{% url 'course_unenroll' course.id enrollment.student.id %}" method="post" onsubmit="return confirm('Are you sure you want to remove this student from the course?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill py-1">
+                                                <i data-lucide="user-minus" style="width: 14px; height: 14px; vertical-align: text-bottom;"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{% if user.role == 'ADMIN' %}5{% else %}4{% endif %}" class="text-center text-muted py-4">No students are currently enrolled in this course.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

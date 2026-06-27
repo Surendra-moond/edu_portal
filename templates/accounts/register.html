@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration | EduPortal</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body class="bg-primary">
+    <div class="auth-page py-5">
+        <div class="auth-card" style="max-width: 750px;">
+            <div class="text-center mb-4">
+                <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white p-3 rounded-3 mb-3 shadow-sm">
+                    <i data-lucide="user-plus" style="width: 36px; height: 36px;"></i>
+                </div>
+                <h4 class="fw-bold mb-1">Student Registration</h4>
+                <p class="text-muted small">Create your account to access the student portal</p>
+            </div>
+            
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger border-0 rounded-3 mb-3" role="alert">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Account Credentials -->
+                <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Account Credentials</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="id_username" class="form-label small fw-semibold text-secondary">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label small fw-semibold text-secondary">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_password" class="form-label small fw-semibold text-secondary">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<div class="text-danger small mt-1">{{ form.password.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_confirm_password" class="form-label small fw-semibold text-secondary">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}<div class="text-danger small mt-1">{{ form.confirm_password.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Academic Info -->
+                <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">2. Academic Information</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="id_roll_number" class="form-label small fw-semibold text-secondary">Roll Number</label>
+                        {{ form.roll_number }}
+                        {% if form.roll_number.errors %}<div class="text-danger small mt-1">{{ form.roll_number.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_department" class="form-label small fw-semibold text-secondary">Department</label>
+                        {{ form.department }}
+                        {% if form.department.errors %}<div class="text-danger small mt-1">{{ form.department.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="id_semester" class="form-label small fw-semibold text-secondary">Semester</label>
+                        {{ form.semester }}
+                        {% if form.semester.errors %}<div class="text-danger small mt-1">{{ form.semester.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Personal Profiles -->
+                <h5 class="fw-bold text-primary mb-3 border-bottom pb-2">3. Personal Profile</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="id_first_name" class="form-label small fw-semibold text-secondary">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_last_name" class="form-label small fw-semibold text-secondary">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_phone" class="form-label small fw-semibold text-secondary">Phone Number</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}<div class="text-danger small mt-1">{{ form.phone.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_gender" class="form-label small fw-semibold text-secondary">Gender</label>
+                        {{ form.gender }}
+                        {% if form.gender.errors %}<div class="text-danger small mt-1">{{ form.gender.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_dob" class="form-label small fw-semibold text-secondary">Date of Birth</label>
+                        {{ form.dob }}
+                        {% if form.dob.errors %}<div class="text-danger small mt-1">{{ form.dob.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="id_profile_image" class="form-label small fw-semibold text-secondary">Profile Picture</label>
+                        {{ form.profile_image }}
+                        {% if form.profile_image.errors %}<div class="text-danger small mt-1">{{ form.profile_image.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label for="id_address" class="form-label small fw-semibold text-secondary">Residential Address</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}<div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Submit Registration</button>
+                    <a href="{% url 'login' %}" class="btn btn-link text-decoration-none text-muted small">Back to Login</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Init Lucide
+        lucide.createIcons();
+        
+        // Apply saved theme
+        const activeTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', activeTheme);
+    </script>
+</body>
+</html>

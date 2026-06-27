@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile | EduPortal{% endblock %}
+{% block page_title %}Edit My Profile{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary" style="max-width: 800px; margin: 0 auto;">
+    <h5 class="fw-bold text-primary mb-4 pb-2 border-bottom">
+        <i data-lucide="user" class="me-2" style="vertical-align: text-bottom;"></i>Profile Details
+    </h5>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3">
+            {% for field in form %}
+                <div class="{% if field.name == 'address' %}col-12{% else %}col-md-6{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="form-label small fw-semibold text-secondary">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in field.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if field.help_text %}
+                        <span class="form-text text-muted small">{{ field.help_text }}</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4 pt-3 border-top d-flex gap-2 justify-content-end">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill">Cancel</a>
+            <button type="submit" class="btn btn-primary rounded-pill">Save Profile Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

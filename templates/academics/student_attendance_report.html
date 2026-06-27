@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendance Report | EduPortal{% endblock %}
+{% block page_title %}Attendance Statistics{% endblock %}
+
+{% block content %}
+<div class="row g-4" style="max-width: 900px; margin: 0 auto;">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary">
+            <h5 class="fw-bold text-primary mb-3">Student Profiling</h5>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">Student Name</span>
+                    <span class="fw-bold text-dark">{{ student.first_name }} {{ student.last_name }}</span>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <span class="text-muted small d-block">Roll Number</span>
+                    <span class="fw-bold text-dark">{{ student.roll_number }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-12">
+        <div class="table-card">
+            <div class="table-card-header">
+                <h5 class="m-0 fw-bold text-dark">Course Attendance breakdown</h5>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>Course Title</th>
+                            <th>Total Classes</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Percentage</th>
+                            <th style="width: 250px;">Progress Bar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in attendance_summary %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ item.course.course_name }}</div>
+                                    <span class="text-muted small">{{ item.course.course_code }}</span>
+                                </td>
+                                <td><span class="fw-bold">{{ item.total_classes }}</span></td>
+                                <td><span class="text-success fw-semibold">{{ item.present_classes }}</span></td>
+                                <td><span class="text-danger fw-semibold">{{ item.absent_classes }}</span></td>
+                                <td>
+                                    <span class="fw-bold {% if item.percentage < 75.0 %}text-danger{% else %}text-success{% endif %}">
+                                        {{ item.percentage }}%
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="progress" style="height: 10px; border-radius: 5px;">
+                                        <div class="progress-bar {% if item.percentage < 75.0 %}bg-danger{% else %}bg-success{% endif %}" 
+                                             role="progressbar" style="width: {{ item.percentage }}%;" 
+                                             aria-valuenow="{{ item.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <span class="small text-muted mt-1 d-block">Minimum required: 75%</span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">No attendance records registered.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

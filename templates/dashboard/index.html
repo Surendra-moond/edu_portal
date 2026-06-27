@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | EduPortal{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-4">
+    {% if role == 'ADMIN' %}
+        <!-- Admin Dashboard Cards -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-primary">{{ total_students }}</div>
+                    <div class="stat-label">Total Students</div>
+                </div>
+                <div class="stat-icon primary">
+                    <i data-lucide="users"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-info">{{ total_teachers }}</div>
+                    <div class="stat-label">Total Teachers</div>
+                </div>
+                <div class="stat-icon info">
+                    <i data-lucide="user-cog"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-success">{{ total_courses }}</div>
+                    <div class="stat-label">Total Courses</div>
+                </div>
+                <div class="stat-icon success">
+                    <i data-lucide="book-open"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-warning">{{ attendance_rate }}%</div>
+                    <div class="stat-label">Attendance Rate</div>
+                </div>
+                <div class="stat-icon warning">
+                    <i data-lucide="calendar-check"></i>
+                </div>
+            </div>
+        </div>
+
+    {% elif role == 'TEACHER' %}
+        <!-- Teacher Dashboard Cards -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-primary">{{ total_courses }}</div>
+                    <div class="stat-label">My Assigned Courses</div>
+                </div>
+                <div class="stat-icon primary">
+                    <i data-lucide="book-marked"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-success">{{ total_students }}</div>
+                    <div class="stat-label">Students Under Me</div>
+                </div>
+                <div class="stat-icon success">
+                    <i data-lucide="users"></i>
+                </div>
+            </div>
+        </div>
+
+    {% elif role == 'STUDENT' %}
+        <!-- Student Dashboard Cards -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-primary">{{ total_courses }}</div>
+                    <div class="stat-label">Enrolled Courses</div>
+                </div>
+                <div class="stat-icon primary">
+                    <i data-lucide="book-open"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-warning">{{ attendance_percentage }}%</div>
+                    <div class="stat-label">My Attendance</div>
+                </div>
+                <div class="stat-icon warning">
+                    <i data-lucide="calendar-range"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card">
+                <div class="stat-info">
+                    <div class="stat-value text-success">{{ average_marks }}</div>
+                    <div class="stat-label">Average Marks</div>
+                </div>
+                <div class="stat-icon success">
+                    <i data-lucide="award"></i>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{% if role == 'ADMIN' %}
+    <!-- Admin Dynamic Content -->
+    <div class="row">
+        <div class="col-12 col-lg-8">
+            <div class="table-card">
+                <div class="table-card-header">
+                    <h5 class="m-0 fw-bold text-dark">Recently Added Students</h5>
+                    <a href="{% url 'admin_student_list' %}" class="btn btn-outline-primary btn-sm rounded-pill">View All</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table custom-table">
+                        <thead>
+                            <tr>
+                                <th>Roll Number</th>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in recent_students %}
+                                <tr>
+                                    <td><span class="fw-bold">{{ student.roll_number }}</span></td>
+                                    <td>{{ student.first_name }} {{ student.last_name }}</td>
+                                    <td>{{ student.department }}</td>
+                                    <td>Semester {{ student.semester }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">No students added yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-12 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary">
+                <h5 class="fw-bold mb-3 text-dark">Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'admin_student_add' %}" class="btn btn-primary text-start">
+                        <i data-lucide="user-plus" class="me-2"></i> Add New Student
+                    </a>
+                    <a href="{% url 'admin_teacher_add' %}" class="btn btn-info text-start text-white">
+                        <i data-lucide="user-cog" class="me-2"></i> Add New Teacher
+                    </a>
+                    <a href="{% url 'course_add' %}" class="btn btn-success text-start">
+                        <i data-lucide="plus-circle" class="me-2"></i> Create New Course
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% elif role == 'TEACHER' %}
+    <!-- Teacher Dynamic Content -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h5 class="m-0 fw-bold text-dark">My Assigned Courses</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Course Title</th>
+                        <th>Credits</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in courses %}
+                        <tr>
+                            <td><span class="fw-bold">{{ course.course_code }}</span></td>
+                            <td>{{ course.course_name }}</td>
+                            <td>{{ course.credits }} Credits</td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-2">
+                                    <a href="{% url 'mark_attendance' course.id %}" class="btn btn-warning btn-sm rounded-pill text-dark fw-medium">
+                                        <i data-lucide="check-square" class="me-1" style="width: 14px; height: 14px;"></i> Mark Attendance
+                                    </a>
+                                    <a href="{% url 'manage_marks' course.id %}" class="btn btn-primary btn-sm rounded-pill">
+                                        <i data-lucide="award" class="me-1" style="width: 14px; height: 14px;"></i> Manage Grades
+                                    </a>
+                                    <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                                        <i data-lucide="eye" class="me-1" style="width: 14px; height: 14px;"></i> View Details
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">You are not assigned to any courses.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+{% elif role == 'STUDENT' %}
+    <!-- Student Dynamic Content -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h5 class="m-0 fw-bold text-dark">My Registered Courses</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Course Title</th>
+                        <th>Teacher</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                        <tr>
+                            <td><span class="fw-bold">{{ enrollment.course.course_code }}</span></td>
+                            <td>{{ enrollment.course.course_name }}</td>
+                            <td>
+                                {% if enrollment.course.teacher %}
+                                    {{ enrollment.course.teacher.user.get_full_name|default:enrollment.course.teacher.user.username }}
+                                {% else %}
+                                    <span class="text-muted">Not Assigned</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'course_detail' enrollment.course.id %}" class="btn btn-outline-primary btn-sm rounded-pill">
+                                    <i data-lucide="eye" class="me-1" style="width: 14px; height: 14px;"></i> View Course
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">You are not enrolled in any courses.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

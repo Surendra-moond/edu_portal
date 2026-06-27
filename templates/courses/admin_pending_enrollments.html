@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Enrollments | EduPortal{% endblock %}
+{% block page_title %}Pending Course Enrollments{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-4"
+             style="background: linear-gradient(135deg, #8b5cf622, #8b5cf611); border-left: 4px solid #8b5cf6 !important;">
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center justify-content-center rounded-3 p-3"
+                     style="background: rgba(139,92,246,0.15); width:56px; height:56px;">
+                    <i data-lucide="book-open-check" style="width:28px;height:28px;color:#8b5cf6;"></i>
+                </div>
+                <div>
+                    <div class="fs-3 fw-bold">{{ paginator.count }}</div>
+                    <div class="text-muted small">Course enrollment request(s) waiting for your review</div>
+                </div>
+                <div class="ms-auto">
+                    <a href="{% url 'course_list' %}" class="btn btn-outline-secondary btn-sm rounded-pill">
+                        <i data-lucide="book-open" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                        Manage Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if pending_requests %}
+<div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+    <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-3 px-4">
+        <h6 class="fw-bold mb-0">
+            <i data-lucide="clipboard-list" class="me-2" style="width:18px;height:18px;vertical-align:middle;color:#8b5cf6;"></i>
+            Enrollment Requests
+        </h6>
+        <span class="badge rounded-pill" style="background:#8b5cf6; color:#fff;">
+            {{ paginator.count }} pending
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4 py-3">#</th>
+                    <th class="py-3">Student</th>
+                    <th class="py-3">Roll Number</th>
+                    <th class="py-3">Course</th>
+                    <th class="py-3">Requested</th>
+                    <th class="py-3 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for req in pending_requests %}
+                <tr>
+                    <td class="ps-4 text-muted small">{{ forloop.counter }}</td>
+                    <td>
+                        <div class="d-flex align-items-center gap-3">
+                            {% if req.student.profile_image %}
+                                <img src="{{ req.student.profile_image.url }}" alt="{{ req.student.first_name }}"
+                                     class="rounded-circle object-fit-cover"
+                                     style="width:40px;height:40px;border:2px solid #8b5cf6;">
+                            {% else %}
+                                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                                     style="width:40px;height:40px;background:linear-gradient(135deg,#8b5cf6,#7c3aed);font-size:1rem;">
+                                    {{ req.student.first_name|first|upper }}
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div class="fw-semibold">{{ req.student.first_name }} {{ req.student.last_name }}</div>
+                                <div class="text-muted small">@{{ req.student.user.username }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge bg-secondary rounded-pill">{{ req.student.roll_number }}</span></td>
+                    <td>
+                        <div class="fw-semibold">{{ req.course.course_name }}</div>
+                        <div class="text-muted small">{{ req.course.course_code }} · {{ req.course.credits }} credits</div>
+                    </td>
+                    <td class="text-muted small">{{ req.requested_at|date:"M d, Y H:i" }}</td>
+                    <td class="text-center">
+                        <div class="d-flex gap-2 justify-content-center">
+                            <form method="post" action="{% url 'admin_approve_enrollment' req.pk %}"
+                                  onsubmit="return confirm('Approve enrollment for {{ req.student.first_name }} in {{ req.course.course_name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm rounded-pill px-3">
+                                    <i data-lucide="check" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                                    Approve
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'admin_reject_enrollment' req.pk %}"
+                                  onsubmit="return confirm('Reject enrollment request for {{ req.student.first_name }} in {{ req.course.course_name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                    <i data-lucide="x" class="me-1" style="width:14px;height:14px;vertical-align:middle;"></i>
+                                    Reject
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer bg-transparent border-top py-3 px-4">
+        <nav aria-label="Pending enrollments pagination">
+            <ul class="pagination pagination-sm mb-0 justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link rounded-pill" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                    </li>
+                {% endif %}
+                {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link rounded-pill">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link rounded-pill" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link rounded-pill" href="?page={{ page_obj.next_page_number }}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+{% else %}
+<div class="card border-0 shadow-sm rounded-3 p-5 text-center">
+    <div class="d-inline-flex align-items-center justify-content-center rounded-circle mx-auto mb-3"
+         style="width:72px;height:72px;background:rgba(16,185,129,0.1);">
+        <i data-lucide="check-circle-2" style="width:36px;height:36px;color:#10b981;"></i>
+    </div>
+    <h5 class="fw-bold mb-2">All Clear!</h5>
+    <p class="text-muted mb-4">There are no pending course enrollment requests right now.</p>
+    <a href="{% url 'course_list' %}" class="btn btn-primary rounded-pill px-4">
+        <i data-lucide="book-open" class="me-2" style="width:16px;height:16px;vertical-align:middle;"></i>
+        View All Courses
+    </a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Card | EduPortal{% endblock %}
+{% block page_title %}Academic Report Card{% endblock %}
+
+{% block content %}
+<div class="row g-4" style="max-width: 950px; margin: 0 auto;">
+    <!-- Student Header -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-secondary">
+            <h5 class="fw-bold text-primary mb-3">Academic Performance Overview</h5>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <span class="text-muted small d-block">Student Name</span>
+                    <span class="fw-bold text-dark fs-6">{{ student.first_name }} {{ student.last_name }}</span>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="text-muted small d-block">Roll Number</span>
+                    <span class="fw-bold text-dark fs-6">{{ student.roll_number }}</span>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="text-muted small d-block">Overall Average Marks</span>
+                    <span class="fw-bold text-primary fs-5">{{ average_marks }}</span>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="text-muted small d-block">Enrolled Courses</span>
+                    <span class="fw-bold text-dark fs-6">{{ total_courses }} Courses</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Report Card Table -->
+    <div class="col-12">
+        <div class="table-card">
+            <div class="table-card-header">
+                <h5 class="m-0 fw-bold text-dark">Academics Grade Sheet</h5>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>Course Name</th>
+                            <th>Assignments (100)</th>
+                            <th>Mid-Exam (100)</th>
+                            <th>Final-Exam (100)</th>
+                            <th>Total Average</th>
+                            <th>Teacher Comments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in marks_records %}
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ record.course.course_name }}</div>
+                                    <span class="text-muted small">{{ record.course.course_code }}</span>
+                                </td>
+                                <td>{{ record.assignment_marks }}</td>
+                                <td>{{ record.mid_marks }}</td>
+                                <td>{{ record.final_marks }}</td>
+                                <td><span class="fw-bold text-primary fs-6">{{ record.total_marks }}</span></td>
+                                <td>
+                                    {% if record.teacher_comments %}
+                                        <p class="small text-muted mb-0 italic" style="max-width: 250px;">"{{ record.teacher_comments }}"</p>
+                                    {% else %}
+                                        <span class="text-muted small">No comments</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">No academic grade records exist.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
